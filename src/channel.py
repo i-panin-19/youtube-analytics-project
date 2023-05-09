@@ -10,9 +10,35 @@ class Channel:
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
-        self.channel_id = channel_id
+        self.__channel_id = channel_id
+        results = self.youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
+        self.title = results['items'][0]['snippet']['title']
+        self.description = results['items'][0]['snippet']['description']
+        self.url = 'https://www.youtube.com/channel/' + self.__channel_id
+        self.subscriber_count = results['items'][0]['statistics']['subscriberCount']
+        self.video_count = results['items'][0]['statistics']['videoCount']
+        self.view_count = results['items'][0]['statistics']['viewCount']
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
-        channel = self.youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute()
+        channel = self.youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
         print(json.dumps(channel, indent=2, ensure_ascii=False))
+
+    @classmethod
+    def get_service(cls):
+        return cls.youtube
+
+    @staticmethod
+    def to_json(filename):
+        obj = json.dumps(Channel('UCMCgOm8GZkHp8zJ6l7_hIuA').__dict__)
+        with open(filename, 'w') as writefile:
+            json.dump(obj, writefile)
+
+    @property
+    def channel_id(self):
+        return self.__channel_id
+
+    @channel_id.setter
+    def channel_id(self, channel_id):
+        if channel_id != self.__channel_id:
+            print("AttributeError: property 'channel_id' of 'Channel' object has no setter")
